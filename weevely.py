@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # This file is part of Weevely NG.
 #
 # Copyright(c) 2011-2012 Weevely Developers
