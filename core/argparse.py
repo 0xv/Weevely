@@ -133,7 +133,9 @@ _UNRECOGNIZED_ARGS_ATTR = '_unrecognized_args'
 # Utility functions and classes
 # =============================
 
+
 class _AttributeHolder(object):
+
     """Abstract base class that provides __repr__.
 
     The __repr__ method returns a string in the format::
@@ -169,6 +171,7 @@ def _ensure_value(namespace, name, value):
 # ===============
 
 class HelpFormatter(object):
+
     """Formatter for generating usage messages and argument help strings.
 
     Only the name of this class is considered a public API. All the methods
@@ -642,13 +645,14 @@ class HelpFormatter(object):
     def _fill_text(self, text, width, indent):
         text = self._whitespace_matcher.sub(' ', text).strip()
         return _textwrap.fill(text, width, initial_indent=indent,
-                                           subsequent_indent=indent)
+                              subsequent_indent=indent)
 
     def _get_help_string(self, action):
         return action.help
 
 
 class RawDescriptionHelpFormatter(HelpFormatter):
+
     """Help message formatter which retains any formatting in descriptions.
 
     Only the name of this class is considered a public API. All the methods
@@ -660,6 +664,7 @@ class RawDescriptionHelpFormatter(HelpFormatter):
 
 
 class RawTextHelpFormatter(RawDescriptionHelpFormatter):
+
     """Help message formatter which retains formatting of all help text.
 
     Only the name of this class is considered a public API. All the methods
@@ -671,6 +676,7 @@ class RawTextHelpFormatter(RawDescriptionHelpFormatter):
 
 
 class ArgumentDefaultsHelpFormatter(HelpFormatter):
+
     """Help message formatter which adds default values to argument help.
 
     Only the name of this class is considered a public API. All the methods
@@ -695,7 +701,7 @@ def _get_action_name(argument):
     if argument is None:
         return None
     elif argument.option_strings:
-        return  '/'.join(argument.option_strings)
+        return '/'.join(argument.option_strings)
     elif argument.metavar not in (None, SUPPRESS):
         return argument.metavar
     elif argument.dest not in (None, SUPPRESS):
@@ -705,6 +711,7 @@ def _get_action_name(argument):
 
 
 class ArgumentError(Exception):
+
     """An error from creating or using an argument (optional or positional).
 
     The string value of this exception is the message, augmented with
@@ -725,6 +732,7 @@ class ArgumentError(Exception):
 
 
 class ArgumentTypeError(Exception):
+
     """An error from trying to convert a command line string to a type."""
     pass
 
@@ -734,6 +742,7 @@ class ArgumentTypeError(Exception):
 # ==============
 
 class Action(_AttributeHolder):
+
     """Information about how to convert command line strings to Python objects.
 
     Action objects are used by an ArgumentParser to represent the information
@@ -1112,7 +1121,8 @@ class _SubParsersAction(Action):
         # parse all the remaining options into the namespace
         # store any unrecognized options on the object, so that the top
         # level parser can decide what to do with them
-        namespace, arg_strings = parser.parse_known_args(arg_strings, namespace)
+        namespace, arg_strings = parser.parse_known_args(
+            arg_strings, namespace)
         if arg_strings:
             vars(namespace).setdefault(_UNRECOGNIZED_ARGS_ATTR, [])
             getattr(namespace, _UNRECOGNIZED_ARGS_ATTR).extend(arg_strings)
@@ -1123,6 +1133,7 @@ class _SubParsersAction(Action):
 # ==============
 
 class FileType(object):
+
     """Factory for creating file object types
 
     Instances of FileType are typically passed as type= arguments to the
@@ -1165,7 +1176,9 @@ class FileType(object):
 # Optional and Positional Parsing
 # ===========================
 
+
 class Namespace(_AttributeHolder):
+
     """Simple object for storing attributes.
 
     Implements equality by attribute names and values, and provides a simple
@@ -1188,20 +1201,19 @@ class Namespace(_AttributeHolder):
         return key in self.__dict__
 
 
-
 class StoredNamespace(Namespace):
-    
+
     stored = True
-    
+
     def __getitem__(self, key):
         return getattr(self, key)
-    
-    def __setitem__(self,key, value):
+
+    def __setitem__(self, key, value):
         return setattr(self, key, value)
-    
+
     def __len__(self):
         return len(self.__dict__)
-    
+
     def __delitem__(self, key):
         delattr(self, key)
 
@@ -1212,6 +1224,7 @@ class StoredNamespace(Namespace):
     def update(self, arguments):
         for arg, value in arguments.items():
             setattr(self, arg, value)
+
 
 class _ActionsContainer(object):
 
@@ -1291,7 +1304,6 @@ class _ActionsContainer(object):
             if action.dest == dest and action.default is not None:
                 return action.default
         return self._defaults.get(dest, None)
-
 
     # =======================
     # Adding argument actions
@@ -1490,9 +1502,7 @@ class _ActionsContainer(object):
 
     def _handle_conflict_error(self, action, conflicting_actions):
         message = _('conflicting option string(s): %s')
-        conflict_string = ', '.join([option_string
-                                     for option_string, action
-                                     in conflicting_actions])
+        conflict_string = ', '.join([option_string for option_string, action in conflicting_actions])
         raise ArgumentError(action, message % conflict_string)
 
     def _handle_conflict_resolve(self, action, conflicting_actions):
@@ -1564,6 +1574,7 @@ class _MutuallyExclusiveGroup(_ArgumentGroup):
 
 
 class ArgumentParser(_AttributeHolder, _ActionsContainer):
+
     """Object for parsing command line strings into Python objects.
 
     Keyword Arguments:
@@ -1639,12 +1650,12 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
             default_prefix = prefix_chars[0]
         if self.add_help:
             self.add_argument(
-                default_prefix+'h', default_prefix*2+'help',
+                default_prefix + 'h', default_prefix * 2 + 'help',
                 action='help', default=SUPPRESS,
                 help=_('show this help message and exit'))
         if self.version:
             self.add_argument(
-                default_prefix+'v', default_prefix*2+'version',
+                default_prefix + 'v', default_prefix * 2 + 'version',
                 action='version', default=SUPPRESS,
                 version=self.version,
                 help=_("show program's version number and exit"))
@@ -1978,14 +1989,16 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
         # if we didn't use all the Positional objects, there were too few
         # arg strings supplied.
         if positionals:
-            if not hasattr(namespace, 'stored') or getattr(namespace, 'stored') == False: self.error(_('too few arguments'))
+            if not hasattr(namespace, 'stored') or getattr(namespace, 'stored') == False:
+                self.error(_('too few arguments'))
 
         # make sure all required actions were present
         for action in self._actions:
             if action.required:
                 if action not in seen_actions:
                     name = _get_action_name(action)
-                    if not hasattr(namespace, 'stored'): self.error(_('argument %s is required') % name)
+                    if not hasattr(namespace, 'stored'):
+                        self.error(_('argument %s is required') % name)
 
         # make sure all required groups had one option present
         for group in self._mutually_exclusive_groups:
@@ -2000,7 +2013,8 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
                              for action in group._group_actions
                              if action.help is not SUPPRESS]
                     msg = _('one of the arguments %s is required')
-                    if not hasattr(namespace, 'stored'): self.error(msg % ' '.join(names))
+                    if not hasattr(namespace, 'stored'):
+                        self.error(msg % ' '.join(names))
 
         # return the updated namespace and the extra arguments
         return namespace, extras
@@ -2103,8 +2117,7 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
 
         # if multiple actions match, the option string was ambiguous
         if len(option_tuples) > 1:
-            options = ', '.join([option_string
-                for action, option_string, explicit_arg in option_tuples])
+            options = ', '.join([option_string for action, option_string, explicit_arg in option_tuples])
             tup = arg_string, options
             self.error(_('ambiguous option: %s could match %s') % tup)
 
@@ -2359,7 +2372,7 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
     def print_help(self, file=None):
         if file is None:
             file = _sys.stdout
-        #self._print_message(self.format_help(), file)
+        # self._print_message(self.format_help(), file)
 
     def print_version(self, file=None):
         import warnings
@@ -2391,4 +2404,5 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
         should either exit or raise an exception.
         """
         self.print_usage()
-        raise ModuleException(self.prog[1:], message + '. Run \':help %s\' for help.' % self.prog[1:])
+        raise ModuleException(
+            self.prog[1:], message + '. Run \':help %s\' for help.' % self.prog[1:])

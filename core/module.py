@@ -8,7 +8,9 @@ from core.vector import VectorsDict
 from os import linesep
 from core.modulebase import ModuleBase
 
+
 class Module(ModuleBase):
+
     '''Generic Module class to inherit.
 
     The Module object is a dynamically loaded Weevely extension that executes
@@ -40,11 +42,11 @@ class Module(ModuleBase):
 
     from core.module import Module
     from core.moduleexception import ProbeException, ProbeSucceed
-    
+
     WARN_DOWNLOAD_FAIL = 'Downloaded failed'
-    
+
     class Webdownload(Module):
-        
+
         def _set_args(self):
 
             # Declare the parameters accepted by this module. They will be
@@ -52,7 +54,7 @@ class Module(ModuleBase):
 
             self.argparser.add_argument('url')
             self.argparser.add_argument('rpath')
-    
+
         def _set_vectors(self):
 
             # Declare the vectors to execute. The vector named 'wget' uses the
@@ -63,12 +65,12 @@ class Module(ModuleBase):
 
             self.support_vectors.add_vector(name='wget', interpreter='shell.sh', payloads = [ 'wget $url -O $rpath' ])
             self.support_vectors.add_vector(name='check_download', interpreter='file.check', payloads = [ '$rpath', 'exists' ])
-            
+
         def _probe(self):
 
            # Start the download by calling the 'wget' vector.
            self.support_vectors.get('wget').execute(self.args)
-       
+
         def _verify(self):
 
            # Verify downloaded file. Save the vector return value in
@@ -78,35 +80,34 @@ class Module(ModuleBase):
            self._result = self.support_vectors.get('check_download').execute({ 'rpath' : self.args['rpath'] })
            if self._result == False:
                raise ProbeException(self.name, WARN_DOWNLOAD_FAIL)
-           
+
 
     =======================================================================================
 
-       
+
     '''
 
-        
     def _set_vectors(self):
         """Inherit this method to add vectors in self.vectors and
         self.support_vectors lists. This method is called by the constructor.
 
         Example of vector declaration:
-        
+
         > self.support_vectors.add_vector(name='vector_name', interpreter='module_name', payloads = [ 'module_param1', '$module_param2', .. ])
-        
+
         Template fields like '$rpath' are replaced at vector execution.
-        
+
         """
-        
+
         pass
-    
+
     def _set_args(self):
         """Inherit this method to set self.argparser arguments. This method is
         called by module constructor. Arguments passed at module execution are
         stored in the self.args dictionary. See the official python argparse
         documentation.
         """
-        
+
         pass
 
     def _init_module(self):
@@ -122,7 +123,7 @@ class Module(ModuleBase):
         This method is called at every module execution. Throws ModuleException,
         ProbeException.
         """
-        
+
         pass
 
     def _probe(self):
@@ -131,7 +132,7 @@ class Module(ModuleBase):
         statements. This method is mandatory.
 
         Example of vector selection and execution:
-        
+
         > self.support_vectors.get('vector_name').execute({ '$module_param2' : self.args['arg2']})
 
         The vector is selected with VectorList.get(name=''), and launched with
@@ -145,7 +146,6 @@ class Module(ModuleBase):
         """
         pass
 
-    
     def _verify(self):
         """Inherit this method to check the probe result.
 
