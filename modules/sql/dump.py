@@ -87,49 +87,56 @@ WARN_DUMP_SAVED = 'Dump file saved'
 WARN_DUMP_INCOMPLETE = 'Dump failed, saving anyway for debug purposes'
 WARN_NO_DUMP = 'Dump failed, check credentials and dbms information'
 
+
 class Dump(ModuleGuess):
+
     '''Get SQL database dump'''
 
     def _set_vectors(self):
-        self.vectors.add_vector('mysqlphpdump', 'shell.php',  [ mysqlphpdump ] )
-        self.vectors.add_vector('mysqldump', 'shell.sh', "mysqldump -h $host -u $user --password=$pass $db $table --single-transaction") 
-        # --single-transaction to avoid bug http://bugs.mysql.com/bug.php?id=21527        
-    
-    
+        self.vectors.add_vector('mysqlphpdump', 'shell.php',  [mysqlphpdump])
+        self.vectors.add_vector(
+            'mysqldump', 'shell.sh', "mysqldump -h $host -u $user --password=$pass $db $table --single-transaction")
+        # --single-transaction to avoid bug http://bugs.mysql.com/bug.php?id=21527
+
     def _set_args(self):
         self.argparser.add_argument('-user', help='SQL username')
         self.argparser.add_argument('-pass', help='SQL password')
         self.argparser.add_argument('db', help='Database to dump')
         self.argparser.add_argument('-table', help='Table to dump')
-        self.argparser.add_argument('-host', help='DBMS host or host:port', default='127.0.0.1')
+        self.argparser.add_argument(
+            '-host', help='DBMS host or host:port', default='127.0.0.1')
         #argparser.add_argument('-dbms', help='DBMS', choices = ['mysql', 'postgres'], default='mysql')
-        self.argparser.add_argument('-vector', choices = self.vectors.keys())
-        self.argparser.add_argument('-ldump', help='Local path to save dump (default: temporary folder)')
-        
+        self.argparser.add_argument('-vector', choices=self.vectors.keys())
+        self.argparser.add_argument(
+            '-ldump', help='Local path to save dump (default: temporary folder)')
+
     def _prepare_vector(self):
         if not self.args['table']:
             self.args['table'] = ''
         self.formatted_args = self.args.copy()
-        
+
     def _verify_vector_execution(self):
         if self._result and '-- Dumping data for table' in self._result:
-            raise ProbeSucceed(self.name,'Dumped')
-            
+            raise ProbeSucceed(self.name, 'Dumped')
+
     def _stringify_result(self):
 
-        if self._result: 
+        if self._result:
             if not '-- Dumping data for table' in self._result:
                 self.mprint(WARN_DUMP_INCOMPLETE)
-            
+
             if not self.args['ldump']:
                 temporary_folder = mkdtemp(prefix='weev_')
-                self.args['ldump'] = path.join(temporary_folder, '%s:%s@%s-%s.txt' % (self.args['user'], self.args['pass'], self.args['host'], self.args['db']))
-                
+                self.args['ldump'] = path.join(temporary_folder, '%s:%s@%s-%s.txt' % (
+                    self.args['user'], self.args['pass'], self.args['host'], self.args['db']))
+
             try:
-                lfile = open(self.args['ldump'],'w').write(self._result)
+                lfile = open(self.args['ldump'], 'w').write(self._result)
             except:
-                raise ProbeException(self.name,  "\'%s\' %s" % (self.args['ldump'], WARN_DUMP_ERR_SAVING))
+                raise ProbeException(
+                    self.name,  "\'%s\' %s" % (self.args['ldump'], WARN_DUMP_ERR_SAVING))
             else:
-                self.mprint("\'%s\' %s" % (self.args['ldump'], WARN_DUMP_SAVED))
+                self.mprint("\'%s\' %s" %
+                            (self.args['ldump'], WARN_DUMP_SAVED))
         else:
             raise ProbeException(self.name,  WARN_NO_DUMP)

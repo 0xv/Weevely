@@ -1,28 +1,28 @@
 # -*- coding: cp1252 -*-
 # <PythonProxy.py>
 #
-#Copyright (c) <2009> <Fábio Domingues - fnds3000 in gmail.com>
+# Copyright (c) <2009> <Fábio Domingues - fnds3000 in gmail.com>
 #
-#Permission is hereby granted, free of charge, to any person
-#obtaining a copy of this software and associated documentation
-#files (the "Software"), to deal in the Software without
-#restriction, including without limitation the rights to use,
-#copy, modify, merge, publish, distribute, sublicense, and/or sell
-#copies of the Software, and to permit persons to whom the
-#Software is furnished to do so, subject to the following
-#conditions:
+# Permission is hereby granted, free of charge, to any person
+# obtaining a copy of this software and associated documentation
+# files (the "Software"), to deal in the Software without
+# restriction, including without limitation the rights to use,
+# copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following
+# conditions:
 #
-#The above copyright notice and this permission notice shall be
-#included in all copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
 #
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-#EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-#OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-#NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-#HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-#WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-#FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-#OTHER DEALINGS IN THE SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+# WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
 
 """\
 Copyright (c) <2009> <Fábio Domingues - fnds3000 in gmail.com> <MIT Licence>
@@ -81,20 +81,24 @@ Qual a diferença entre um proxy Elite, Anónimo e Transparente?
 
 """
 
-import socket, thread, select
+import socket
+import thread
+import select
 
 __version__ = '0.1.0 Draft 1'
 BUFLEN = 8192
-VERSION = 'Python Proxy/'+__version__
+VERSION = 'Python Proxy/' + __version__
 HTTPVER = 'HTTP/1.1'
 
+
 class ConnectionHandler:
+
     def __init__(self, connection, address, timeout):
         self.client = connection
         self.client_buffer = ''
         self.timeout = timeout
         self.method, self.path, self.protocol = self.get_base_header()
-        if self.method=='CONNECT':
+        if self.method == 'CONNECT':
             self.method_CONNECT()
         elif self.method in ('OPTIONS', 'GET', 'HEAD', 'POST', 'PUT',
                              'DELETE', 'TRACE'):
@@ -106,35 +110,35 @@ class ConnectionHandler:
         while 1:
             self.client_buffer += self.client.recv(BUFLEN)
             end = self.client_buffer.find('\n')
-            if end!=-1:
+            if end != -1:
                 break
-        #print '%s'%self.client_buffer[:end]#debug
-        data = (self.client_buffer[:end+1]).split()
-        self.client_buffer = self.client_buffer[end+1:]
+        # print '%s'%self.client_buffer[:end]#debug
+        data = (self.client_buffer[:end + 1]).split()
+        self.client_buffer = self.client_buffer[end + 1:]
         return data
 
     def method_CONNECT(self):
         self._connect_target(self.path)
-        self.client.send(HTTPVER+' 200 Connection established\n'+
-                         'Proxy-agent: %s\n\n'%VERSION)
+        self.client.send(HTTPVER + ' 200 Connection established\n' +
+                         'Proxy-agent: %s\n\n' % VERSION)
         self.client_buffer = ''
-        self._read_write()        
+        self._read_write()
 
     def method_others(self):
         self.path = self.path[7:]
         i = self.path.find('/')
-        host = self.path[:i]        
+        host = self.path[:i]
         path = self.path[i:]
         self._connect_target(host)
-        self.target.send('%s %s %s\n'%(self.method, path, self.protocol)+
+        self.target.send('%s %s %s\n' % (self.method, path, self.protocol) +
                          self.client_buffer)
         self.client_buffer = ''
         self._read_write()
 
     def _connect_target(self, host):
         i = host.find(':')
-        if i!=-1:
-            port = int(host[i+1:])
+        if i != -1:
+            port = int(host[i + 1:])
             host = host[:i]
         else:
             port = 80
@@ -143,7 +147,7 @@ class ConnectionHandler:
         self.target.connect(address)
 
     def _read_write(self):
-        time_out_max = self.timeout/3
+        time_out_max = self.timeout / 3
         socs = [self.client, self.target]
         count = 0
         while 1:
@@ -165,29 +169,33 @@ class ConnectionHandler:
                 break
 
 proxy_counts = 0
+
+
 def start_server(host='localhost', port=8008, IPv6=False, timeout=60,
-                  handler=ConnectionHandler):
-    
+                 handler=ConnectionHandler):
+
     global proxy_counts
-    
-    if IPv6==True:
-        soc_type=socket.AF_INET6
+
+    if IPv6 == True:
+        soc_type = socket.AF_INET6
     else:
-        soc_type=socket.AF_INET
+        soc_type = socket.AF_INET
     soc = socket.socket(soc_type)
     soc.bind((host, port))
-    print "Serving on %s:%d."%(host, port)#debug
+    print "Serving on %s:%d." % (host, port)  # debug
     soc.listen(0)
     while 1:
-        thread.start_new_thread(handler, soc.accept()+(timeout,))
+        thread.start_new_thread(handler, soc.accept() + (timeout,))
         proxy_counts += 1
 
 
 dummy_counts = 0
+
+
 def start_dummy_tcp_server(host='localhost', port=8009):
 
     global dummy_counts
-    
+
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((host, port))
 
@@ -197,7 +205,7 @@ def start_dummy_tcp_server(host='localhost', port=8009):
         conn, addr = s.accept()
         data = conn.recv(BUFLEN)
         conn.send(data)
-        
+
         conn.close()
         dummy_counts += 1
 

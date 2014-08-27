@@ -4,6 +4,7 @@ from thread import start_new_thread
 from sys import argv, exit
 import re
 
+
 class ProxyHandler(SocketServer.StreamRequestHandler):
 
     def __init__(self, request, client_address, server):
@@ -13,10 +14,10 @@ class ProxyHandler(SocketServer.StreamRequestHandler):
         self.phpproxy = server.rurl
 
         try:
-            SocketServer.StreamRequestHandler.__init__(self, request, client_address,server)
+            SocketServer.StreamRequestHandler.__init__(
+                self, request, client_address, server)
         except Exception, e:
             raise
-
 
     def handle(self):
         req, body, cl, req_len, read_len = '', 0, 0, 0, 4096
@@ -28,12 +29,13 @@ class ProxyHandler(SocketServer.StreamRequestHandler):
                         # send it anyway..
                         self.send_req(req)
                         return
-                    #if line[0:17].lower() == 'proxy-connection:':
+                    # if line[0:17].lower() == 'proxy-connection:':
                     #    req += "Connection: close\r\n"
                     #    continue
                     req += line
                     if not cl:
-                        t = re.compile('^Content-Length: (\d+)', re.I).search(line)
+                        t = re.compile(
+                            '^Content-Length: (\d+)', re.I).search(line)
                         if t is not None:
                             cl = int(t.group(1))
                             continue
@@ -56,7 +58,7 @@ class ProxyHandler(SocketServer.StreamRequestHandler):
             raise
 
     def send_req(self, req):
-        #print req
+        # print req
         if req == '':
             return
         ua = urllib.FancyURLopener(self.proxies)
@@ -64,22 +66,23 @@ class ProxyHandler(SocketServer.StreamRequestHandler):
         r = ua.open(self.phpproxy, urllib.urlencode({'req': req}))
         while 1:
             c = r.read(2048)
-            if c == '': break
+            if c == '':
+                break
             self.wfile.write(c)
         self.wfile.close()
-        
-        
+
+
 if __name__ == "__main__":
-    
+
     if len(argv) < 5:
         print '[!] Usage: ./local_proxy.py <localhost> <localport> <rurl> <useragent>'
         exit(1)
-        
+
     lhost = argv[1]
     lport = int(argv[2])
     rurl = argv[3]
     agent = argv[4]
-    
+
     SocketServer.TCPServer.allow_reuse_address = True
     server = SocketServer.ThreadingTCPServer((lhost, lport), ProxyHandler)
     server.rurl = rurl
