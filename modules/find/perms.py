@@ -6,8 +6,8 @@ from core.argparse import ArgumentParser
 
 
 class Perms(ModuleGuess):
-    '''Find files with write, read, execute permissions'''
 
+    '''Find files with write, read, execute permissions'''
 
     def _set_vectors(self):
         self.vectors.add_vector('php_recursive', 'shell.php', """$fdir='$rpath';$ftype='$type';$fattr='$attr';$fqty='$first';$recurs=$recursion;
@@ -22,61 +22,74 @@ $df.=join('/', array(trim($d, '/'), trim($f, '/')));
 if(($f!='.')&&($f!='..')&&ckprint($df,$t,$a) && ($q!="")) return;
 if(($f!='.')&&($f!='..')&&cktp($df,'d')&&$r){@swp($fdir, $df, $t, $a, $q,$r);}
 } if($h) { closedir($h); } }""")
-        self.vectors.add_vector("find" , 'shell.sh', "find $rpath $recursion $type $attr $first 2>/dev/null")
-    
-    def _set_args(self):
-        self.argparser.add_argument('rpath', help='Remote starting path', default ='.', nargs='?')
-        self.argparser.add_argument('-first', help='Quit after first match', action='store_true')
-        self.argparser.add_argument('-type', help='File type',  choices = ['f','d'])
-        self.argparser.add_argument('-writable', help='Match writable files', action='store_true')
-        self.argparser.add_argument('-readable', help='Matches redable files', action='store_true')
-        self.argparser.add_argument('-executable', help='Matches executable files', action='store_true')
-        self.argparser.add_argument('-vector', choices = self.vectors.keys())
-        self.argparser.add_argument('-no-recursion', help='Do not descend into subfolders', action='store_true', default=False)
+        self.vectors.add_vector(
+            "find", 'shell.sh', "find $rpath $recursion $type $attr $first 2>/dev/null")
 
+    def _set_args(self):
+        self.argparser.add_argument(
+            'rpath', help='Remote starting path', default='.', nargs='?')
+        self.argparser.add_argument(
+            '-first', help='Quit after first match', action='store_true')
+        self.argparser.add_argument(
+            '-type', help='File type',  choices=['f', 'd'])
+        self.argparser.add_argument(
+            '-writable', help='Match writable files', action='store_true')
+        self.argparser.add_argument(
+            '-readable', help='Matches redable files', action='store_true')
+        self.argparser.add_argument(
+            '-executable', help='Matches executable files', action='store_true')
+        self.argparser.add_argument('-vector', choices=self.vectors.keys())
+        self.argparser.add_argument(
+            '-no-recursion', help='Do not descend into subfolders', action='store_true', default=False)
 
     def _prepare_vector(self):
-        
-        self.formatted_args = { 'rpath' : self.args['rpath'] }
-        
+
+        self.formatted_args = {'rpath': self.args['rpath']}
+
         if self.current_vector.name == 'find':
-            
+
             # Set first
-            self.formatted_args['first'] = '-print -quit' if self.args['first'] else ''
-            
+            self.formatted_args[
+                'first'] = '-print -quit' if self.args['first'] else ''
+
             # Set type
             type = self.args['type'] if self.args['type'] else ''
             if type:
                 type = '-type %s' % type
             self.formatted_args['type'] = type
-                    
+
             # Set attr
-            self.formatted_args['attr'] = '-writable' if self.args['writable'] else ''
-            self.formatted_args['attr'] += ' -readable' if self.args['readable'] else ''
-            self.formatted_args['attr'] += ' -executable' if self.args['executable'] else ''
-            
+            self.formatted_args[
+                'attr'] = '-writable' if self.args['writable'] else ''
+            self.formatted_args[
+                'attr'] += ' -readable' if self.args['readable'] else ''
+            self.formatted_args[
+                'attr'] += ' -executable' if self.args['executable'] else ''
+
             # Set recursion
-            self.formatted_args['recursion'] =  ' -maxdepth 1 ' if self.args['no_recursion'] else ''
+            self.formatted_args[
+                'recursion'] = ' -maxdepth 1 ' if self.args['no_recursion'] else ''
 
         else:
             # Vector.name = php_find
             # Set first
             self.formatted_args['first'] = '1' if self.args['first'] else ''
-            
+
             # Set type
-            self.formatted_args['type']  = self.args['type'] if self.args['type'] else ''
-            
+            self.formatted_args['type'] = self.args[
+                'type'] if self.args['type'] else ''
+
             # Set attr
             self.formatted_args['attr'] = 'w' if self.args['writable'] else ''
             self.formatted_args['attr'] += 'r' if self.args['readable'] else ''
-            self.formatted_args['attr'] += 'x' if self.args['executable'] else ''
-            
+            self.formatted_args[
+                'attr'] += 'x' if self.args['executable'] else ''
+
             # Set recursion
             self.formatted_args['recursion'] = not self.args['no_recursion']
-            
-            
+
     def _stringify_result(self):
-        
-        # Listify output, to advantage other modules 
+
+        # Listify output, to advantage other modules
         self._output = self._result
         self._result = self._result.split('\n') if self._result else []
