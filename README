@@ -1,7 +1,6 @@
 > This repository is currently unmantained, cause we are working at the Weevely fork weevely3 you can find at https://github.com/epinna/weevely3
 
-> If you are a developer or a curious user and desire to contribute, point to the weevely3 repositore and give some help!
-
+> If you are a developer or a curious user and desire to contribute, point your browser to the weevely3 repository and help us!
 
 
 Weevely is a stealth PHP web shell that simulate an SSH-like connection. It is an essential tool for web application post exploitation, and can be used as stealth backdoor or as a web shell to manage legit web accounts, even free hosted ones.
